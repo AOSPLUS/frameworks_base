@@ -43,6 +43,7 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -116,7 +117,7 @@ public class KeyguardViewManager {
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
-            setKeyguardParams();
+            //setKeyguardParams();
             if (mKeyguardHost == null) {
                 maybeCreateKeyguardLocked(shouldEnableScreenRotation(), false, null);
                 hide();
@@ -494,10 +495,6 @@ public class KeyguardViewManager {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
 
-        if (mLockscreenNotifications) {
-            mNotificationViewManager.onScreenTurnedOn();
-        }
-
         // If keyguard is not showing, we need to inform PhoneWindowManager with a null
         // token so it doesn't wait for us to draw...
         final IBinder token = isShowing() ? mKeyguardHost.getWindowToken() : null;
@@ -538,6 +535,10 @@ public class KeyguardViewManager {
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception calling onShown():", e);
             }
+        }
+
+        if (mLockscreenNotifications) {
+            mNotificationViewManager.onScreenTurnedOn();
         }
     }
 
