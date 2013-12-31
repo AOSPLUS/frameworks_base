@@ -4461,8 +4461,8 @@ public final class Settings {
             UI_NIGHT_MODE,
             UI_THEME_MODE,
             UI_THEME_AUTO_MODE,
-            PRIVACY_GUARD_DEFAULT,
-            PRIVACY_GUARD_NOTIFICATION
+           // PRIVACY_GUARD_DEFAULT,
+           // PRIVACY_GUARD_NOTIFICATION
         };
 
         /**
