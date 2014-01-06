@@ -40,6 +40,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -113,6 +114,7 @@ class QuickSettings {
         LOCATION,
         IMMERSIVE,
         SLEEP,
+        VOLUME,
         LIGHTBULB
     }
 
@@ -1011,6 +1013,34 @@ class QuickSettings {
                     });
                     parent.addView(sleepTile);
                     if(addMissing) sleepTile.setVisibility(View.GONE);
+
+
+    // Volume tile
+    } else if(Tile.VOLUME.toString().equals(tile.toString())) { 
+                    
+                    final QuickSettingsBasicTile volumeTile
+                    = new QuickSettingsBasicTile(mContext);
+                    volumeTile.setTileId(Tile.VOLUME);
+                    volumeTile.setImageResource(R.drawable.ic_qs_volume);
+                    volumeTile.setTextResource(R.string.quick_settings_volume_label);
+                    volumeTile.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            collapsePanels();
+                      AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+                      am.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+                        }
+                    });
+
+                    volumeTile.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            startSettingsActivity(android.provider.Settings.ACTION_SOUND_SETTINGS);
+                      return true;
+                        }
+                    });
+                    parent.addView(volumeTile);
+                    if(addMissing) volumeTile.setVisibility(View.GONE);
                 }
             }
         }
@@ -1068,34 +1098,6 @@ class QuickSettings {
         });
 
         parent.addView(usbModeTile);
-
-        // Remote Display
-        QuickSettingsBasicTile remoteDisplayTile
-                = new QuickSettingsBasicTile(mContext);
-        remoteDisplayTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                collapsePanels();
-
-                final Dialog[] dialog = new Dialog[1];
-                dialog[0] = MediaRouteDialogPresenter.createDialog(mContext,
-                        MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
-                        new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog[0].dismiss();
-                        startSettingsActivity(
-                                android.provider.Settings.ACTION_WIFI_DISPLAY_SETTINGS);
-                    }
-                });
-                dialog[0].getWindow().setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-                dialog[0].show();
-            }
-        });
-        mModel.addRemoteDisplayTile(remoteDisplayTile,
-                new QuickSettingsModel.BasicRefreshCallback(remoteDisplayTile)
-                        .setShowWhenEnabled(true));
-        parent.addView(remoteDisplayTile);
 
         if (SHOW_IME_TILE || DEBUG_GONE_TILES) {
             // IME
