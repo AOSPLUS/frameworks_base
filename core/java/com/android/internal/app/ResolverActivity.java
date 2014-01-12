@@ -764,4 +764,3 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
         }
     }
 }
-
