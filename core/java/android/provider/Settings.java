@@ -2931,6 +2931,12 @@ public final class Settings {
         public static final String APP_SIDEBAR_EXCLUDE_LIST = "app_sidebar_exclude_list";
 
         /**
+         * Setting to show determine if AOSP dialer is used
+         * @hide
+         */
+        public static final String AOSP_DIALER = "aosp_dialer";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
