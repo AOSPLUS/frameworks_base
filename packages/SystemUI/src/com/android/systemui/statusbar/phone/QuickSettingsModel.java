@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.hardware.usb.UsbManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.net.ConnectivityManager;
@@ -42,7 +41,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.util.paranoid.DeviceUtils;
 import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -143,26 +141,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
-    /** Broadcast receive to determine usb tether. */
-    private BroadcastReceiver mUsbIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(UsbManager.ACTION_USB_STATE)) {
-                mUsbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
-            }
-
-            if (intent.getAction().equals(Intent.ACTION_MEDIA_SHARED)) {
-                mMassStorageActive = true;
-            }
-
-            if (intent.getAction().equals(Intent.ACTION_MEDIA_UNSHARED)) {
-                mMassStorageActive = false;
-            }
-
-            onUsbChanged();
-        }
-    };
-
     /** ContentObserver to determine the next alarm */
     private class NextAlarmObserver extends ContentObserver {
         public NextAlarmObserver(Handler handler) {
@@ -251,11 +229,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final NextAlarmObserver mNextAlarmObserver;
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
-    private boolean mUsbTethered = false;
-    private boolean mUsbConnected = false;
-    private boolean mMassStorageActive = false;
-    private String[] mUsbRegexs;
-    private ConnectivityManager mCM;
 
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
@@ -277,10 +250,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mAirplaneModeTile;
     private RefreshCallback mAirplaneModeCallback;
     private State mAirplaneModeState = new State();
-
-    private QuickSettingsTileView mUsbModeTile;
-    private RefreshCallback mUsbModeCallback;
-    private State mUsbModeState = new State();
 
     private QuickSettingsTileView mWifiTile;
     private RefreshCallback mWifiCallback;
@@ -344,7 +313,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 onNextAlarmChanged();
                 onBugreportChanged();
                 rebindMediaRouterAsCurrentUser();
-                onUsbChanged();
             }
         };
 
@@ -360,22 +328,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
         mRemoteDisplayRouteCallback = new RemoteDisplayRouteCallback();
 
-        mCM = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasMobileData = mCM.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        ConnectivityManager cm = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mHasMobileData = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
-
-        // Only register for devices that support usb tethering
-        if (DeviceUtils.deviceSupportsUsbTether(context)) {
-            IntentFilter usbIntentFilter = new IntentFilter();
-            usbIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
-            usbIntentFilter.addAction(UsbManager.ACTION_USB_STATE);
-            usbIntentFilter.addAction(Intent.ACTION_MEDIA_SHARED);
-            usbIntentFilter.addAction(Intent.ACTION_MEDIA_UNSHARED);
-            context.registerReceiver(mUsbIntentReceiver, usbIntentFilter);
-        }
     }
 
     void updateResources() {
@@ -440,40 +399,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mAlarmState.enabled = ! TextUtils.isEmpty(alarmText);
 
         mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
-    }
-
-    // Usb Mode
-    void addUsbModeTile(QuickSettingsTileView view, RefreshCallback cb) {
-        mUsbModeTile = view;
-        mUsbModeTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mUsbConnected) {
-                    setUsbTethering(!mUsbTethered);
-                }
-            }
-        });
-        mUsbModeCallback = cb;
-        onUsbChanged();
-    }
-
-    void onUsbChanged() {
-        updateState();
-        if (mUsbConnected && !mMassStorageActive) {
-            if (mUsbTethered) {
-                mUsbModeState.iconId = R.drawable.ic_qs_usb_tether_on;
-                mUsbModeState.label =
-                        mContext.getString(R.string.quick_settings_usb_tether_on_label);
-            } else {
-                mUsbModeState.iconId = R.drawable.ic_qs_usb_tether_connected;
-                mUsbModeState.label =
-                        mContext.getString(R.string.quick_settings_usb_tether_connected_label);
-            }
-            mUsbModeState.enabled = true;
-        } else {
-            mUsbModeState.enabled = false;
-        }
-        mUsbModeCallback.refreshView(mUsbModeTile, mUsbModeState);
     }
 
     // Airplane Mode
@@ -945,37 +870,5 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         mSslCaCertWarningState.label = r.getString(R.string.ssl_ca_cert_warning);
         mSslCaCertWarningCallback.refreshView(mSslCaCertWarningTile, mSslCaCertWarningState);
-    }
-
-    private void updateState() {
-        mUsbRegexs = mCM.getTetherableUsbRegexs();
-
-        String[] available = mCM.getTetherableIfaces();
-        String[] tethered = mCM.getTetheredIfaces();
-        String[] errored = mCM.getTetheringErroredIfaces();
-        updateState(available, tethered, errored);
-    }
-
-    private void updateState(String[] available, String[] tethered,
-            String[] errored) {
-        updateUsbState(available, tethered, errored);
-    }
-
-    private void updateUsbState(String[] available, String[] tethered,
-            String[] errored) {
-
-        mUsbTethered = false;
-        for (String s : tethered) {
-            for (String regex : mUsbRegexs) {
-                if (s.matches(regex)) mUsbTethered = true;
-            }
-        }
-
-    }
-
-    private void setUsbTethering(boolean enabled) {
-        if (mCM.setUsbTethering(enabled) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-            return;
-        }
     }
 }
