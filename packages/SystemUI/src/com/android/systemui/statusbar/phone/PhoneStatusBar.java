@@ -2659,24 +2659,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         int uiThemeMode = res.getConfiguration().uiThemeMode;
         if (uiThemeMode != mCurrUiThemeMode) {
             mCurrUiThemeMode = uiThemeMode;
-<<<<<<< HEAD
             return;
         }
-=======
-            recreateStatusBar(false);
->>>>>>> 927b9ed... fb: TRDS some tweaks and fixes (1/2)
 
-        } else {
-            if (mClearButton instanceof TextView) {
-                ((TextView)mClearButton).setText(
-                        context.getText(R.string.status_bar_clear_all_button));
-            }
-            loadDimens();
+        if (mClearButton instanceof TextView) {
+            ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
 
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
 
+        loadDimens();
     }
 
     protected void loadDimens() {
