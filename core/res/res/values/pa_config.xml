@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-** Copyright (C) 2013, ParanoidAndroid Project
+/*
+** Copyright (C) 2014 ParanoidAndroid Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -15,11 +16,10 @@
 ** limitations under the License.
 */
 -->
-<resources>
 
-  <!--Notification led-->
-  <java-symbol type="array" name="notification_light_package_mapping" />
-
-  <!--Camera flash-->
-  <java-symbol type="bool" name="config_device_has_camera_flash" />
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds.  Do not translate. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Camera flash -->
+    <bool name="config_device_has_camera_flash">false</bool>
 </resources>
