@@ -144,33 +144,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
-    /** Broadcast receive to determine if device boot is complete*/
-    private BroadcastReceiver mBootReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final ContentResolver cr = mContext.getContentResolver();
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override public void run() {
-                        mUsesAospDialer = Settings.System
-                                                .getInt(cr, Settings.System.AOSP_DIALER, 0) == 1;
-                        if (deviceHasMobileData()) {
-                            if (mUsesAospDialer) {
-                                mMobileNetworkTile.setTemporary(false);
-                                refreshMobileNetworkTile();
-                            } else {
-                                mMobileNetworkTile.setTemporary(true);
-                                mMobileNetworkTile.setVisibility(View.GONE);
-                            }
-                        }
-                    }
-                }, 200);
-            }
-            context.unregisterReceiver(mBootReceiver);
-        }
-    };
-
     /** ContentObserver to determine the next alarm */
     private class NextAlarmObserver extends ContentObserver {
         public NextAlarmObserver(Handler handler) {
@@ -280,9 +253,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
     private final QuiteHourObserver mQuiteHourObserver;
-
-    private boolean mUsesAospDialer = false;
-
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
 
@@ -395,9 +365,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
-
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.System.AOSP_DIALER, 0);
     }
 
     void updateResources() {
