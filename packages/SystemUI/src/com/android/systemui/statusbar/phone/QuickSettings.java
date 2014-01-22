@@ -40,7 +40,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
-import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -106,8 +105,7 @@ class QuickSettings {
         LOCATION,
         IMMERSIVE,
         QUITEHOUR,
-        SLEEP,
-	VOLUME
+        SLEEP
     }
 
     public static final String NO_TILES = "NO_TILES";
@@ -115,8 +113,7 @@ class QuickSettings {
     public static final String DEFAULT_TILES = Tile.USER + DELIMITER + Tile.BRIGHTNESS
         + DELIMITER + Tile.SETTINGS + DELIMITER + Tile.WIFI + DELIMITER + Tile.RSSI
         + DELIMITER + Tile.ROTATION + DELIMITER + Tile.BATTERY + DELIMITER + Tile.BLUETOOTH
-        + DELIMITER + Tile.LOCATION + DELIMITER + Tile.IMMERSIVE
-        + DELIMITER + Tile.AIRPLANE + DELIMITER + Tile.QUITEHOUR;
+        + DELIMITER + Tile.LOCATION + DELIMITER + Tile.IMMERSIVE;
 
     private Context mContext;
     private PanelBar mBar;
@@ -142,8 +139,6 @@ class QuickSettings {
     boolean mEditModeEnabled = false;
 
     private Handler mHandler;
-
-    private int mLastImmersiveMode = 2;
 
     public QuickSettings(Context context, QuickSettingsContainerView container) {
         mDevicePolicyManager
@@ -331,9 +326,9 @@ class QuickSettings {
         collapsePanels();
     }
 
-    private int getImmersiveMode() {
+    private boolean immersiveEnabled() {
         return Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.IMMERSIVE_MODE, 0);
+                    Settings.System.IMMERSIVE_MODE, 0) == 1;
     }
 
     private void addTiles(ViewGroup parent, LayoutInflater inflater, boolean addMissing) {
@@ -727,46 +722,27 @@ class QuickSettings {
                 } else if(Tile.IMMERSIVE.toString().equals(tile.toString())) { // Immersive mode
                     final QuickSettingsBasicTile immersiveTile
                             = new QuickSettingsBasicTile(mContext);
-                    final int immersiveMode = getImmersiveMode();
+                    final boolean immersiveModeOn = immersiveEnabled();
                     immersiveTile.setTileId(Tile.IMMERSIVE);
-                    immersiveTile.setImageResource(immersiveMode != 0
+                    immersiveTile.setImageResource(immersiveModeOn
                                  ? R.drawable.ic_qs_immersive_on
                                  : R.drawable.ic_qs_immersive_off);
-                    immersiveTile.setTextResource(immersiveMode != 0
+                    immersiveTile.setTextResource(immersiveModeOn
                                  ? R.string.quick_settings_immersive_mode_label
                                  : R.string.quick_settings_immersive_mode_off_label);
                     immersiveTile.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             collapsePanels();
-                            int immersive = getImmersiveMode();
-                            immersive = immersive == 0 ? 1 : 0;
-                            immersiveTile.setImageResource(immersive == 0
+                            boolean immersiveOn = immersiveEnabled();
+                            immersiveTile.setImageResource(immersiveOn
                                     ? R.drawable.ic_qs_immersive_off :
                                             R.drawable.ic_qs_immersive_on);
-                            immersiveTile.setTextResource(immersive == 0
+                            immersiveTile.setTextResource(immersiveOn
                                     ? R.string.quick_settings_immersive_mode_off_label :
                                             R.string.quick_settings_immersive_mode_label);
                             Settings.System.putInt(mContext.getContentResolver(),
-                                    Settings.System.IMMERSIVE_MODE, immersive);
-                        }
-                    });
-                    immersiveTile.setOnLongClickListener(new View.OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View v) {
-                            collapsePanels();
-                            int immersive = getImmersiveMode();
-                            if (immersive == 0 || immersive == 1) { 
-                                immersiveTile.setImageResource(R.drawable.ic_qs_immersive_on);
-                                immersiveTile.setTextResource(R.string.quick_settings_immersive_mode_label);
-                                Settings.System.putInt(mContext.getContentResolver(),
-                                        Settings.System.IMMERSIVE_MODE, mLastImmersiveMode);
-                            } else {
-                                mLastImmersiveMode = mLastImmersiveMode == 3 ? 2 : 3;
-                                Settings.System.putInt(mContext.getContentResolver(),
-                                        Settings.System.IMMERSIVE_MODE, mLastImmersiveMode);
-                            }
-                            return true;
+                                    Settings.System.IMMERSIVE_MODE, immersiveOn ? 0 : 1);
                         }
                     });
                     parent.addView(immersiveTile);
@@ -796,68 +772,6 @@ class QuickSettings {
                     });
                     parent.addView(sleepTile);
                     if(addMissing) sleepTile.setVisibility(View.GONE);
-                
-                //QUIET HOURS TILE
-               } else if (Tile.QUITEHOUR.toString().equals(tile.toString())) { // Quite hours tile
-                  // Quite hours mode
-                  final QuickSettingsBasicTile quiteHourTile
-                       = new QuickSettingsBasicTile(mContext);
-                  quiteHourTile.setTileId(Tile.QUITEHOUR);
-                  quiteHourTile.setImageResource(R.drawable.ic_qs_quiet_hours_off);
-                  quiteHourTile.setTextResource(R.string.quick_settings_quiethours_off_label);
-                  quiteHourTile.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           boolean checkModeOn = Settings.System.getInt(mContext
-                                  .getContentResolver(), Settings.System.QUIET_HOURS_ENABLED, 0) == 1;
-                           Settings.System.putInt(mContext.getContentResolver(),
-                                 Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1);
-                           Intent scheduleSms = new Intent();
-                           scheduleSms.setAction("com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND");
-                           mContext.sendBroadcast(scheduleSms);
-                      }
-                  });
-                  quiteHourTile.setOnLongClickListener(new View.OnLongClickListener() {
-                      @Override
-                      public boolean onLongClick(View v) {
-                           Intent intent = new Intent(Intent.ACTION_MAIN);
-                           intent.setClassName("com.android.settings",
-                                  "com.android.settings.Settings$QuietHoursSettingsActivity");
-                           startSettingsActivity(intent);
-                           return true;
-                      }
-                  });
-                  mModel.addQuiteHourTile(quiteHourTile,
-                        new QuickSettingsModel.BasicRefreshCallback(quiteHourTile));
-                  parent.addView(quiteHourTile);
-                  if (addMissing) quiteHourTile.setVisibility(View.GONE);
-
-		// Volume tile
-		} else if(Tile.VOLUME.toString().equals(tile.toString())) { 
-                    
-                    final QuickSettingsBasicTile volumeTile
-                    = new QuickSettingsBasicTile(mContext);
-                    volumeTile.setTileId(Tile.VOLUME);
-                    volumeTile.setImageResource(R.drawable.ic_qs_volume);
-                    volumeTile.setTextResource(R.string.quick_settings_volume_label);
-                    volumeTile.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            collapsePanels();
-                	    AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-                	    am.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
-                        }
-                    });
-
-                    volumeTile.setOnLongClickListener(new View.OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View v) {
-                            startSettingsActivity(android.provider.Settings.ACTION_SOUND_SETTINGS);
-                	    return true;
-                        }
-                    });
-                    parent.addView(volumeTile);
-                    if(addMissing) volumeTile.setVisibility(View.GONE);
                 }
             }
         }
