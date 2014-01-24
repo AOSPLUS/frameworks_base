@@ -2665,12 +2665,6 @@ public final class Settings {
         public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
 
         /**
-         * Sets navigation bar height in percent
-         * @hide
-         */
-        public static final String NAVIGATION_BAR_HEIGHT = "navigation_bar_height";
-
-        /**
          * Show or hide clock
          * 0 - hide
          * 1 - show (default)

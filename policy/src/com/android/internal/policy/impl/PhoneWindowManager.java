@@ -560,10 +560,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_MUSIC_CONTROLS), false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVIGATION_BAR_HEIGHT), false, this,
-                    UserHandle.USER_ALL);
-
             updateSettings();
         }
 
@@ -1127,23 +1123,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Height of the navigation bar when presented horizontally at bottom
         mNavigationBarHeightForRotation[mPortraitRotation] =
         mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                Math.round(res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height) *
-                Settings.System.getFloat(mContext.getContentResolver(),
-                        Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
+                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavigationBarHeightForRotation[mLandscapeRotation] =
-        mNavigationBarHeightForRotation[mSeascapeRotation] = Math.round(res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height_landscape) *
-                Settings.System.getFloat(mContext.getContentResolver(),
-                        Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
+        mNavigationBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height_landscape);
 
         // Width of the navigation bar when presented vertically along one side
         mNavigationBarWidthForRotation[mPortraitRotation] =
         mNavigationBarWidthForRotation[mUpsideDownRotation] =
         mNavigationBarWidthForRotation[mLandscapeRotation] =
         mNavigationBarWidthForRotation[mSeascapeRotation] =
-                Math.round(res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width) *
-                Settings.System.getFloat(mContext.getContentResolver(),
-                        Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
+                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
 
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
@@ -1252,30 +1242,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             MSG_ENABLE_POINTER_LOCATION : MSG_DISABLE_POINTER_LOCATION);
                 }
             }
-        
-            // Height of the navigation bar when presented horizontally at bottom
-            Resources res = mContext.getResources();
-            mNavigationBarHeightForRotation[mPortraitRotation] =
-            mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                    Math.round(res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height) *
-                    Settings.System.getFloat(mContext.getContentResolver(),
-                            Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
-            mNavigationBarHeightForRotation[mLandscapeRotation] =
-            mNavigationBarHeightForRotation[mSeascapeRotation] = Math.round(res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.navigation_bar_height_landscape) *
-                    Settings.System.getFloat(mContext.getContentResolver(),
-                            Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
-
-            // Width of the navigation bar when presented vertically along one side
-            mNavigationBarWidthForRotation[mPortraitRotation] =
-            mNavigationBarWidthForRotation[mUpsideDownRotation] =
-            mNavigationBarWidthForRotation[mLandscapeRotation] =
-            mNavigationBarWidthForRotation[mSeascapeRotation] =
-                    Math.round(res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width) *
-                    Settings.System.getFloat(mContext.getContentResolver(),
-                            Settings.System.NAVIGATION_BAR_HEIGHT, 1f));
-
-
             // use screen off timeout setting as the timeout for the lockscreen
             mLockScreenTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.SCREEN_OFF_TIMEOUT, 0, UserHandle.USER_CURRENT);
