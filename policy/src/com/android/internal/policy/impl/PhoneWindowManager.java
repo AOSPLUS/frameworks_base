@@ -3454,17 +3454,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-<<<<<<< HEAD
     private int updateSystemUiVisibilityFlagsForImmersiveModes(int vis) {
         if (immersiveModeHidesNavigationBar()) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-=======
-    private int updateSystemUiVisibilityFlagsForExpandedDesktop(int vis) {
-        if (expandedDesktopHidesNavigationBar()) {
-            if ((vis & View.SYSTEM_UI_FLAG_SHOW_NAVIGATION_IN_EXPANDED_DESKTOP) == 0) {
-                vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-            }
->>>>>>> 61941dd... NavigationBar : Customization
         }
         if (immersiveModeHidesStatusBar()) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN;
