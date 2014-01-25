@@ -113,7 +113,6 @@ class QuickSettings {
         LOCATION,
         IMMERSIVE,
         SLEEP,
-        MOBILENETWORK,
         LIGHTBULB
     }
 
@@ -942,43 +941,6 @@ class QuickSettings {
                     parent.addView(immersiveTile);
                     if(addMissing) immersiveTile.setVisibility(View.GONE);
 
-                } else if (Tile.MOBILENETWORK.toString().equals(tile.toString())) { // MobileNetwork
-                    if (mModel.deviceHasMobileData()) {
-                        final QuickSettingsBasicTile mobileNetworkTile
-                                = new QuickSettingsBasicTile(mContext);
-                        mobileNetworkTile.setTileId(Tile.MOBILENETWORK);
-                        mobileNetworkTile.setImageResource(R.drawable.ic_qs_unexpected_network);
-                        mobileNetworkTile.setTextResource(R.string.quick_settings_network_unknown);
-                        mobileNetworkTile.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mModel.toggleMobileNetworkState();
-                            }
-                        });
-
-                        mobileNetworkTile.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                Intent intent = new Intent(Intent.ACTION_MAIN);
-                                intent.setClassName("com.android.phone", "com.android.phone.Settings");
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startSettingsActivity(intent);
-                                return true;
-                            }
-                        });
-
-                        mModel.addMobileNetworkTile(mobileNetworkTile, new QuickSettingsModel.RefreshCallback() {
-                            @Override
-                            public void refreshView(QuickSettingsTileView unused, State mobileNetworkState) {
-                                mobileNetworkTile.setImageResource(mobileNetworkState.iconId);
-                                mobileNetworkTile.setText(mobileNetworkState.label);
-                            }
-                        });
-
-                        parent.addView(mobileNetworkTile);
-                        if(addMissing) mobileNetworkTile.setVisibility(View.GONE);
-                        mModel.refreshMobileNetworkTile();
-                    }
                 } else if(Tile.LIGHTBULB.toString().equals(tile.toString())) { // Lightbulb tile
                     final QuickSettingsBasicTile lightbulbTile
                             = new QuickSettingsBasicTile(mContext);
