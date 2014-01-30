@@ -27,10 +27,8 @@
     <string name="reboot_system" product="tablet">Reboot tablet</string>
     <string name="reboot_system" product="default">Reboot phone</string>
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
-
     <!-- label for item that screenshots in phone options dialog -->
     <string name="global_action_screenshot">Screenshot</string>
-
     <!-- Button to reboot the phone, within the Reboot Options dialog -->
     <string name="reboot_reboot">Reboot</string>
     <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
@@ -43,15 +41,33 @@
     <string name="reboot_fastboot">Fastboot</string>
     <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
     <string name="reboot_download">Download</string>
-
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Rebooting\u2026</string>
     <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
     <string name="reboot_confirm">Your phone will reboot.</string>
-
     <!-- label for item that reboots the phone in phone options dialog -->
     <string name="global_action_reboot">Reboot</string>
-
     <!-- label for item that opens the profile choosing dialog -->
     <string name="global_action_choose_profile">Profile</string>
+
+    <!--CyanogenMod Profiles -->
+    <!-- Names of default profiles. -->
+    <string name="profileNameDefault">Default</string>
+    <string name="profileNameWork">Work</string>
+    <string name="profileNameHome">Home</string>
+    <string name="profileNameSilent">Silent</string>
+    <string name="profileNameNight">Night</string>
+    <!-- Names of application groups. -->
+    <string name="profileGroupPhone">Phone</string>
+    <string name="profileGroupCalendar">Calendar</string>
+    <string name="profileGroupGmail">Gmail</string>
+    <string name="profileGroupEmail">Email</string>
+    <string name="profileGroupSMS">SMS</string>
+    <!-- Name of wildcard profile. -->
+    <string name="wildcardProfile">Other</string>
+    <!-- The title of the profile picker dialog. -->
+    <string name="profile_picker_title">Profiles</string>
+    <!-- The item label for the no profile selection item. -->
+    <string name="profile_none">None</string>
+
 </resources>

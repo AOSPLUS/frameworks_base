@@ -2669,6 +2669,12 @@ public final class Settings {
         public static final String LOCKSCREEN_NOTIFICATIONS_COLOR = "lockscreen_notifications_color";
 
         /**
+         * Volume rocker wake
+         * @hide
+         */
+        public static final String SYSTEM_PROFILES_ENABLED = "system_profiles_enabled";
+
+        /**
          * Immersive mode global actions switch
          * 0 = no
          * 1 = yes
@@ -3924,6 +3930,18 @@ public final class Settings {
 
         /**
          * bluetooth HCI snoop log configuration
+         * Whether the Wimax should be on.  Only the WiMAX service should touch this.
+         * @hide
+         */
+         public static final String WIMAX_ON = "wimax_on";
+
+        /**
+         * This are the settings to be backed up.
+         *
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
+         *
          * @hide
          */
         public static final String BLUETOOTH_HCI_LOG =
