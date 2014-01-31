@@ -36,6 +36,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -81,6 +82,7 @@ public class NavigationBarView extends LinearLayout implements NavigationCallbac
     boolean mShowMenu;
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
+    boolean mWasNotifsButtonVisible = false;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon,
             mRecentIcon, mRecentLandIcon, mRecentAltIcon, mRecentAltLandIcon;
@@ -296,6 +298,11 @@ public class NavigationBarView extends LinearLayout implements NavigationCallbac
         return mCurrentView.findViewById(R.id.camera_button);
     }
 
+    // used for lockscreen notifications
+    public View getNotifsButton() {
+        return mCurrentView.findViewById(R.id.show_notifs);
+    }
+
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
@@ -363,6 +370,17 @@ public class NavigationBarView extends LinearLayout implements NavigationCallbac
         setDisabledFlags(mDisabledFlags, true);
     }
 
+    public void setButtonDrawable(int buttonId, final int iconId) {
+        final ImageView iv = (ImageView)getNotifsButton();
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (iconId == 1) iv.setImageResource(R.drawable.search_light_land);
+                else iv.setImageDrawable(mVertical ? mRecentAltLandIcon : mRecentAltIcon);
+                mWasNotifsButtonVisible = iconId != 0 && ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+                setVisibleOrGone(getNotifsButton(), mWasNotifsButtonVisible);
+            }
+        });
+    }
     public int getNavigationIconHints() {
         return mNavigationIconHints;
     }
@@ -409,8 +427,15 @@ public class NavigationBarView extends LinearLayout implements NavigationCallbac
 
         final boolean showSearch = disableHome && !disableSearch;
         final boolean showCamera = showSearch && !mCameraDisabledByDpm;
+        final boolean showNotifs = showSearch &&
+                Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_NOTIFICATIONS, 1) == 1 &&
+                Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_NOTIFICATIONS_PRIVACY_MODE, 0) == 0;
+
         setVisibleOrGone(getSearchLight(), showSearch);
         setVisibleOrGone(getCameraButton(), showCamera);
+        setVisibleOrGone(getNotifsButton(), showNotifs && mWasNotifsButtonVisible);
 
         mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
